@@ -79,9 +79,7 @@ a)  css, fonts, jasmine, and js: these directories all contain required
     project files and should be downloaded to your local machine or uploaded
     to a web server.
 b)  index.html: the main page for the application. This file is required.
-c)  project-meta: contains notes and rubric for the project itself. This 
-    directory is not required to make the project run.
-d)  README.md: this file. Not required to make the project run.
+c)  README.md: this file. Not required to make the project run.
     
     
 #### -C- INSTALLATION/USE ####

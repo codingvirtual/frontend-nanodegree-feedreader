@@ -23,6 +23,8 @@ $(function () {
          */
         it('are defined', function () {
             expect(allFeeds).toBeDefined();
+            // Confirm allFeeds is in fact an array
+            expect(allFeeds instanceof Array).toBeTruthy();
             expect(allFeeds.length).not.toBe(0);
         });
 
@@ -38,6 +40,9 @@ $(function () {
                 // Examine each entry and confirm the url property has content of some
                 // form, which is how I'm defining "not empty"
                 expect(allFeeds[index].url.length).not.toBe(0);
+                // Do a cursory check of the URL to ensure it conforms to
+                // at least basic formatting rules
+                expect(allFeeds[index].url).toMatch(/^http(s?)\:\/\//);
             }
         });
 
@@ -52,6 +57,8 @@ $(function () {
                 // Examine each entry and confirm the name property has content of some
                 // form, which is how I'm defining "not empty"
                 expect(allFeeds[index].name.length).not.toBe(0);
+                // Confirm that the name is in fact a string
+                expect(typeof allFeeds[index].name).toBe('string');
             }
         });
     });
@@ -82,7 +89,7 @@ $(function () {
             // The menu is shown and hidden by manipulating the CSS
             // class of the body element. If the body contains the target
             // class, the menu is hidden.
-            expect(document.body.className).toContain(targetClass);
+            expect(body.classList.contains('menu-hidden')).toBeTruthy();
         });
 
         /* TODO: Write a test that ensures the menu changes
@@ -96,7 +103,7 @@ $(function () {
             menuIcon.click();
 
             // As before, the document body should not contain the target class
-            expect(document.body.className).not.toContain(targetClass);
+            expect(body.classList.contains('menu-hidden')).toBeFalsy();
 
             // Click the menu icon again. Now it should disappear
             menuIcon.click();
@@ -145,38 +152,36 @@ $(function () {
          * Remember, loadFeed() is asynchronous.
          */
 
-        // Grab the title of the first feed entry that is on the screen
-        // when the test suite starts. This will be used in the tests
-        // to see if the content actually changed.
-        // NOTE: this assumes that any blog other than feed 1 is currently
-        // loaded. By default, feed 0 should be loaded.
+        // Set up variables to contain the entry(ies) content both before
+        // and after selecting a new feed. This will allow for deep inspection
+        // of the content.
+        var contentBefore, contentAfter;
 
-        var firstEntryTitle = $('.entry h2:first').text();
-
-        // set up beforeEach to call loadFeed with the 1st element of the
-        // allFeeds array and with a callback function that simply calls
-        // Jasmine's done() function. This call should cause the page
-        // content to change from what was there before the beforeEach
-        // call was made.
-        beforeEach(function (done) {
-            loadFeed(1, function () {
-                done();
+        // Before each test, grab the "old" content, load a new feed, then
+        // grab the "new" content
+        beforeEach(function(done) {
+            loadFeed(0, function() {
+                // capture original feed content
+                contentBefore = $('.feed').html();
+                // select & load a new feed
+                loadFeed(1, function() {
+                    // capture the new feed content
+                    contentAfter = $('.feed').html();
+                    done();
+                });
             });
         });
 
-        it('loadFeed actually changes the content on the page', function() {
-            // This test works by comparing the title of the first entry
-            // on the page "now" (after the loadFeed executes within
-            // beforeEach) to the title that was first before the tests
-            // started (before "beforeEach()" executed
-
-            // Get the title of the "new" first entry.
-            var curTitle = $('.entry h2:first').text();
-
-            // Expect the title of the first entry to be different than it
-            // was before the suite's beforeEach() call was made. This means
-            // that content actually changed.
-            expect(curTitle).not.toBe(firstEntryTitle);
+        it("content changes after load feed function runs", function() {
+            // This is a deep inspection of the content both before and after
+            // a new feed is loaded. It borders on impossible for the content
+            // to be identical after switching feeds, so this test should
+            // capture all but the most remote of possibilities (note: if the
+            // same URL was entered into two different feed sources, this test
+            // would fail, though technically new feed content did in fact
+            // load. Might be good to add a test to ensure that no two feeds
+            // have the same URL.
+            expect(contentBefore).not.toEqual(contentAfter);
         });
 
     });
